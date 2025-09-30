@@ -1,0 +1,581 @@
+/**
+ * Example Kanban Tasks demonstrating the full workflow
+ */
+
+import type { IKanbanTask } from './types';
+import { createEmptyTask } from './utils';
+
+/**
+ * Example tasks covering the full workflow
+ */
+export const exampleTasks: IKanbanTask[] = [
+  // Backlog Task
+  createEmptyTask({
+    id: 'EXAMPLE-001',
+    title: 'Add Dark Mode Support',
+    description: 'Implement dark mode theme switching across the application',
+    status: 'backlog',
+    goal: 'Allow users to toggle between light and dark themes',
+    developer: '',
+    complexity: 'M',
+    sprint: 'Sprint 2',
+    tags: ['feature', 'ui', 'theme'],
+    subTasks: [],
+    acceptanceCriteria: [],
+    testCases: [],
+    relatedFiles: [],
+    dependencies: [],
+    bugs: [],
+    devLog: [],
+  }),
+
+  // To Do Task
+  createEmptyTask({
+    id: 'EXAMPLE-002',
+    title: 'Implement User Authentication',
+    description: 'Add JWT-based authentication system with login/logout functionality',
+    status: 'todo',
+    goal: 'Secure user access with proper authentication',
+    developer: 'Alice Chen',
+    complexity: 'L',
+    sprint: 'Sprint 1',
+    tags: ['feature', 'security', 'backend'],
+    subTasks: [
+      { id: 'st-1', title: 'Set up JWT library', completed: false },
+      { id: 'st-2', title: 'Create login endpoint', completed: false },
+      { id: 'st-3', title: 'Create logout endpoint', completed: false },
+      { id: 'st-4', title: 'Add token refresh mechanism', completed: false },
+      { id: 'st-5', title: 'Implement protected routes', completed: false },
+    ],
+    acceptanceCriteria: [
+      {
+        id: 'ac-1',
+        description: 'Users can log in with email and password',
+        validated: false,
+      },
+      {
+        id: 'ac-2',
+        description: 'Invalid credentials show appropriate error message',
+        validated: false,
+      },
+      {
+        id: 'ac-3',
+        description: 'JWT token expires after configured time',
+        validated: false,
+      },
+      {
+        id: 'ac-4',
+        description: 'Protected routes redirect to login when not authenticated',
+        validated: false,
+      },
+    ],
+    testCases: [],
+    relatedFiles: [
+      {
+        id: 'file-1',
+        type: 'code',
+        path: 'src/auth/jwt-service.ts',
+        description: 'JWT service implementation',
+      },
+      {
+        id: 'file-2',
+        type: 'design',
+        path: 'designs/login-screen.fig',
+        description: 'Login screen design',
+      },
+    ],
+    dependencies: [],
+    bugs: [],
+    devLog: [],
+    estimatedHours: 16,
+  }),
+
+  // In Progress Task
+  createEmptyTask({
+    id: 'EXAMPLE-003',
+    title: 'Add Export to PDF Feature',
+    description: 'Allow users to export reports as PDF documents',
+    status: 'in_progress',
+    goal: 'Enable PDF export for all report types',
+    developer: 'Bob Smith',
+    complexity: 'M',
+    sprint: 'Sprint 1',
+    tags: ['feature', 'export', 'pdf'],
+    subTasks: [
+      { id: 'st-1', title: 'Research PDF generation libraries', completed: true },
+      { id: 'st-2', title: 'Set up PDF library', completed: true },
+      { id: 'st-3', title: 'Implement basic PDF generation', completed: true },
+      { id: 'st-4', title: 'Add styling and formatting', completed: false },
+      { id: 'st-5', title: 'Add charts and images support', completed: false },
+      { id: 'st-6', title: 'Write unit tests', completed: false },
+    ],
+    acceptanceCriteria: [
+      {
+        id: 'ac-1',
+        description: 'PDF export button is visible on all report pages',
+        validated: false,
+      },
+      {
+        id: 'ac-2',
+        description: 'Generated PDF maintains report formatting',
+        validated: false,
+      },
+      {
+        id: 'ac-3',
+        description: 'Charts render correctly in PDF',
+        validated: false,
+      },
+      {
+        id: 'ac-4',
+        description: 'Large reports (>100 pages) export successfully',
+        validated: false,
+      },
+    ],
+    testCases: [],
+    relatedFiles: [
+      {
+        id: 'file-1',
+        type: 'code',
+        path: 'src/export/pdf-generator.ts',
+        description: 'PDF generation service',
+      },
+    ],
+    dependencies: [],
+    bugs: [],
+    devLog: [
+      {
+        id: 'log-1',
+        timestamp: '2025-09-28T10:00:00Z',
+        author: 'Bob Smith',
+        action: 'Started development',
+        description: 'Researched PDF libraries and chose jsPDF',
+        problems: 'Initial library had issues with Chinese characters',
+        solutions: 'Switched to pdfmake which has better Unicode support',
+      },
+      {
+        id: 'log-2',
+        timestamp: '2025-09-29T14:30:00Z',
+        author: 'Bob Smith',
+        action: 'Implemented basic generation',
+        description: 'Basic text and table export working',
+      },
+    ],
+    estimatedHours: 12,
+    actualHours: 8,
+  }),
+
+  // In Review Task
+  createEmptyTask({
+    id: 'EXAMPLE-004',
+    title: 'Fix Data Grid Performance Issues',
+    description: 'Optimize data grid rendering for large datasets (10k+ rows)',
+    status: 'in_review',
+    goal: 'Improve grid performance to handle 50k rows smoothly',
+    developer: 'Carol Wang',
+    complexity: 'L',
+    sprint: 'Sprint 1',
+    tags: ['bug', 'performance', 'grid'],
+    subTasks: [
+      { id: 'st-1', title: 'Profile current performance', completed: true },
+      { id: 'st-2', title: 'Implement virtual scrolling', completed: true },
+      { id: 'st-3', title: 'Add row height caching', completed: true },
+      { id: 'st-4', title: 'Optimize cell renderers', completed: true },
+      { id: 'st-5', title: 'Add performance tests', completed: true },
+      { id: 'st-6', title: 'Update documentation', completed: true },
+    ],
+    acceptanceCriteria: [
+      {
+        id: 'ac-1',
+        description: 'Grid renders 50k rows without lag',
+        validated: false,
+      },
+      {
+        id: 'ac-2',
+        description: 'Scrolling is smooth (60fps)',
+        validated: false,
+      },
+      {
+        id: 'ac-3',
+        description: 'Initial load time < 2 seconds',
+        validated: false,
+      },
+    ],
+    testCases: [
+      {
+        id: 'tc-1',
+        title: 'Verify grid renders 50k rows',
+        description: 'Load grid with 50k rows and verify rendering',
+        status: 'pending',
+      },
+      {
+        id: 'tc-2',
+        title: 'Measure scroll performance',
+        description: 'Use Chrome DevTools to verify 60fps during scrolling',
+        status: 'pending',
+      },
+      {
+        id: 'tc-3',
+        title: 'Measure initial load time',
+        description: 'Verify initial render completes in under 2 seconds',
+        status: 'pending',
+      },
+    ],
+    relatedFiles: [
+      {
+        id: 'file-1',
+        type: 'code',
+        path: 'src/components/grid/VirtualScroller.tsx',
+        description: 'Virtual scrolling implementation',
+      },
+    ],
+    dependencies: [],
+    bugs: [],
+    pullRequest: {
+      id: 'pr-123',
+      title: 'feat: Optimize data grid performance',
+      description: 'Implements virtual scrolling and cell renderer optimizations',
+      modifications: 'Modified VirtualScroller, CellRenderer, and added caching layer',
+      runInstructions: 'npm run dev, navigate to /grid-demo, test with large dataset',
+      impactAreas: 'Grid component, all pages using data grid',
+      regressionRisks: 'May affect custom cell renderers, test all grid features',
+      reviews: [
+        {
+          id: 'review-1',
+          reviewer: 'David Lee',
+          status: 'pending',
+          comments: 'Looks good, testing now',
+        },
+      ],
+      createdAt: '2025-09-29T16:00:00Z',
+    },
+    devLog: [
+      {
+        id: 'log-1',
+        timestamp: '2025-09-27T09:00:00Z',
+        author: 'Carol Wang',
+        action: 'Started investigation',
+        description: 'Profiled performance with Chrome DevTools',
+        problems: 'Found that all 50k rows were being rendered at once',
+        solutions: 'Decided to implement virtual scrolling',
+      },
+      {
+        id: 'log-2',
+        timestamp: '2025-09-28T11:00:00Z',
+        author: 'Carol Wang',
+        action: 'Implemented virtual scrolling',
+        description: 'Created VirtualScroller component',
+      },
+      {
+        id: 'log-3',
+        timestamp: '2025-09-29T15:00:00Z',
+        author: 'Carol Wang',
+        action: 'Created PR',
+        description: 'Submitted PR for review',
+      },
+    ],
+    estimatedHours: 20,
+    actualHours: 18,
+  }),
+
+  // Testing Task
+  createEmptyTask({
+    id: 'EXAMPLE-005',
+    title: 'Implement Real-time Collaboration',
+    description: 'Add real-time collaboration features with WebSocket',
+    status: 'testing',
+    goal: 'Enable multiple users to collaborate in real-time',
+    developer: 'Eve Martinez',
+    complexity: 'L',
+    sprint: 'Sprint 1',
+    tags: ['feature', 'realtime', 'collaboration'],
+    subTasks: [
+      { id: 'st-1', title: 'Set up WebSocket server', completed: true },
+      { id: 'st-2', title: 'Implement presence system', completed: true },
+      { id: 'st-3', title: 'Add cursor tracking', completed: true },
+      { id: 'st-4', title: 'Implement conflict resolution', completed: true },
+      { id: 'st-5', title: 'Add user indicators', completed: true },
+      { id: 'st-6', title: 'Write tests', completed: true },
+    ],
+    acceptanceCriteria: [
+      {
+        id: 'ac-1',
+        description: 'Users see each other\'s cursors in real-time',
+        validated: true,
+        validatedBy: 'Product Manager',
+        validatedAt: '2025-09-29T10:00:00Z',
+      },
+      {
+        id: 'ac-2',
+        description: 'Changes sync within 100ms',
+        validated: true,
+        validatedBy: 'Product Manager',
+        validatedAt: '2025-09-29T10:05:00Z',
+      },
+      {
+        id: 'ac-3',
+        description: 'Conflicts are resolved automatically',
+        validated: true,
+        validatedBy: 'Product Manager',
+        validatedAt: '2025-09-29T10:10:00Z',
+      },
+    ],
+    testCases: [
+      {
+        id: 'tc-1',
+        title: 'Verify multi-user presence',
+        description: 'Open app in 3 browsers, verify all users see each other',
+        status: 'passed',
+      },
+      {
+        id: 'tc-2',
+        title: 'Test cursor synchronization',
+        description: 'Move cursor in one browser, verify it shows in others',
+        status: 'passed',
+      },
+      {
+        id: 'tc-3',
+        title: 'Test conflict resolution',
+        description: 'Edit same cell simultaneously, verify conflict resolution',
+        status: 'pending',
+        notes: 'Waiting for QA',
+      },
+      {
+        id: 'tc-4',
+        title: 'Test network resilience',
+        description: 'Disconnect/reconnect, verify state sync',
+        status: 'pending',
+      },
+    ],
+    relatedFiles: [
+      {
+        id: 'file-1',
+        type: 'code',
+        path: 'src/realtime/websocket-service.ts',
+        description: 'WebSocket service',
+      },
+    ],
+    dependencies: [],
+    bugs: [
+      {
+        id: 'bug-1',
+        title: 'Cursor sometimes jumps to wrong position',
+        description: 'When scrolling quickly, cursor position calculation is off',
+        priority: 'P1',
+        status: 'open',
+        reporter: 'QA Team',
+        createdAt: '2025-09-30T09:00:00Z',
+      },
+    ],
+    pullRequest: {
+      id: 'pr-124',
+      title: 'feat: Add real-time collaboration',
+      description: 'Implements WebSocket-based real-time collaboration',
+      modifications: 'Added WebSocket service, presence system, cursor tracking',
+      runInstructions: 'npm run dev, open multiple browser windows, test collaboration',
+      impactAreas: 'All collaborative features, WebSocket connection',
+      regressionRisks: 'May affect existing data sync, test thoroughly',
+      reviews: [
+        {
+          id: 'review-1',
+          reviewer: 'David Lee',
+          status: 'approved',
+          comments: 'Great work! Code is clean and well-tested',
+          reviewedAt: '2025-09-28T14:00:00Z',
+        },
+        {
+          id: 'review-2',
+          reviewer: 'Alice Chen',
+          status: 'approved',
+          comments: 'Security looks good, nice conflict resolution',
+          reviewedAt: '2025-09-28T15:30:00Z',
+        },
+      ],
+      createdAt: '2025-09-27T10:00:00Z',
+    },
+    devLog: [
+      {
+        id: 'log-1',
+        timestamp: '2025-09-25T10:00:00Z',
+        author: 'Eve Martinez',
+        action: 'Research',
+        description: 'Evaluated WebSocket libraries',
+        problems: 'Socket.io too heavy, raw WebSocket needs more code',
+        solutions: 'Chose ws library with custom protocol',
+      },
+    ],
+    estimatedHours: 24,
+    actualHours: 26,
+  }),
+
+  // Blocked Task
+  createEmptyTask({
+    id: 'EXAMPLE-006',
+    title: 'Integrate Payment Gateway',
+    description: 'Add Stripe payment integration for premium subscriptions',
+    status: 'blocked',
+    goal: 'Enable users to purchase premium subscriptions',
+    developer: 'Frank Liu',
+    complexity: 'M',
+    sprint: 'Sprint 1',
+    tags: ['feature', 'payment', 'integration'],
+    subTasks: [
+      { id: 'st-1', title: 'Set up Stripe account', completed: true },
+      { id: 'st-2', title: 'Implement checkout flow', completed: false },
+      { id: 'st-3', title: 'Add webhook handlers', completed: false },
+      { id: 'st-4', title: 'Implement subscription management', completed: false },
+    ],
+    acceptanceCriteria: [
+      {
+        id: 'ac-1',
+        description: 'Users can complete checkout flow',
+        validated: false,
+      },
+    ],
+    testCases: [],
+    relatedFiles: [],
+    dependencies: [
+      {
+        taskId: 'EXAMPLE-002',
+        type: 'blocked_by',
+      },
+    ],
+    bugs: [],
+    devLog: [
+      {
+        id: 'log-1',
+        timestamp: '2025-09-29T10:00:00Z',
+        author: 'Frank Liu',
+        action: 'Blocked',
+        description: 'Cannot proceed without authentication system',
+        problems: 'Payment flow requires authenticated users',
+        solutions: 'Waiting for EXAMPLE-002 to be completed',
+      },
+    ],
+    estimatedHours: 10,
+  }),
+
+  // Done Task
+  createEmptyTask({
+    id: 'EXAMPLE-007',
+    title: 'Implement Search Functionality',
+    description: 'Add global search with filters and sorting',
+    status: 'done',
+    goal: 'Allow users to quickly find content',
+    developer: 'Grace Kim',
+    complexity: 'M',
+    sprint: 'Sprint 1',
+    tags: ['feature', 'search', 'ui'],
+    subTasks: [
+      { id: 'st-1', title: 'Design search UI', completed: true },
+      { id: 'st-2', title: 'Implement search API', completed: true },
+      { id: 'st-3', title: 'Add filters', completed: true },
+      { id: 'st-4', title: 'Add sorting options', completed: true },
+      { id: 'st-5', title: 'Optimize search performance', completed: true },
+      { id: 'st-6', title: 'Write tests', completed: true },
+    ],
+    acceptanceCriteria: [
+      {
+        id: 'ac-1',
+        description: 'Search returns results within 500ms',
+        validated: true,
+        validatedBy: 'Product Manager',
+        validatedAt: '2025-09-26T14:00:00Z',
+      },
+      {
+        id: 'ac-2',
+        description: 'Filters work correctly',
+        validated: true,
+        validatedBy: 'Product Manager',
+        validatedAt: '2025-09-26T14:05:00Z',
+      },
+      {
+        id: 'ac-3',
+        description: 'Sorting works in both directions',
+        validated: true,
+        validatedBy: 'Product Manager',
+        validatedAt: '2025-09-26T14:10:00Z',
+      },
+    ],
+    testCases: [
+      {
+        id: 'tc-1',
+        title: 'Verify search performance',
+        description: 'Search with 10k records, verify < 500ms response',
+        status: 'passed',
+        notes: 'QA Passed - Average 320ms',
+      },
+      {
+        id: 'tc-2',
+        title: 'Test filter combinations',
+        description: 'Test all filter combinations work correctly',
+        status: 'passed',
+        notes: 'QA Passed',
+      },
+      {
+        id: 'tc-3',
+        title: 'Test sorting',
+        description: 'Verify ascending and descending sort for all fields',
+        status: 'passed',
+        notes: 'QA Passed',
+      },
+    ],
+    relatedFiles: [
+      {
+        id: 'file-1',
+        type: 'code',
+        path: 'src/search/search-service.ts',
+        description: 'Search service implementation',
+      },
+    ],
+    dependencies: [],
+    bugs: [],
+    pullRequest: {
+      id: 'pr-120',
+      title: 'feat: Add global search functionality',
+      description: 'Implements search with filters and sorting',
+      modifications: 'Added search service, UI components, and API endpoints',
+      runInstructions: 'npm run dev, click search icon, test search functionality',
+      impactAreas: 'All pages with search, API layer',
+      regressionRisks: 'Low - new feature, no existing functionality modified',
+      reviews: [
+        {
+          id: 'review-1',
+          reviewer: 'Alice Chen',
+          status: 'approved',
+          comments: 'Excellent implementation, very performant',
+          reviewedAt: '2025-09-25T10:00:00Z',
+        },
+        {
+          id: 'review-2',
+          reviewer: 'Bob Smith',
+          status: 'approved',
+          comments: 'UI looks great, code is clean',
+          reviewedAt: '2025-09-25T11:00:00Z',
+        },
+      ],
+      createdAt: '2025-09-24T14:00:00Z',
+      mergedAt: '2025-09-25T12:00:00Z',
+    },
+    devLog: [
+      {
+        id: 'log-1',
+        timestamp: '2025-09-23T09:00:00Z',
+        author: 'Grace Kim',
+        action: 'Started development',
+        description: 'Designed search API and UI',
+      },
+      {
+        id: 'log-2',
+        timestamp: '2025-09-24T10:00:00Z',
+        author: 'Grace Kim',
+        action: 'Performance optimization',
+        description: 'Added indexing to improve search speed',
+        problems: 'Initial implementation was slow (>2s)',
+        solutions: 'Added database indexes and caching',
+      },
+    ],
+    estimatedHours: 14,
+    actualHours: 15,
+    completedAt: '2025-09-26T16:00:00Z',
+  }),
+];
