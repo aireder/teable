@@ -192,6 +192,9 @@ function App() {
           onColumnResize={handleColumnResize}
           onSelectionChanged={() => {}}
           onScrollChanged={() => {}}
+          scrollBarVisible={true}
+          smoothScrollX={true}
+          smoothScrollY={true}
           style={{ height: '100%', width: '100%' }}
         />
       </div>
