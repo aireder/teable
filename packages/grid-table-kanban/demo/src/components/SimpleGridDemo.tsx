@@ -1,235 +1,318 @@
-import React, { useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
-// 简化的 Grid 演示组件
+// 轻量版 Demo：实现列宽调整、列拖拽排序、基础编辑，便于本地直接运行体验
+// 说明：这是纯前端实现，用来在 demo 中展示完整交互；实际产品中请使用包内 Canvas Grid 组件
+
+type Column = { key: string; title: string; width: number; minWidth?: number };
+
+type Row = (string | number | boolean)[];
+
+const initialColumns: Column[] = [
+  { key: 'name', title: '姓名', width: 160, minWidth: 80 },
+  { key: 'email', title: '邮箱', width: 240, minWidth: 120 },
+  { key: 'dept', title: '部门', width: 140, minWidth: 100 },
+  { key: 'active', title: '在职', width: 100, minWidth: 80 },
+  { key: 'rating', title: '评分', width: 140, minWidth: 120 },
+  { key: 'status', title: '状态', width: 120, minWidth: 100 },
+];
+
+const initialData: Row[] = [
+  ['张三', 'zhangsan@company.com', '技术部', true, 5, '活跃'],
+  ['李四', 'lisi@company.com', '产品部', false, 4, '休假'],
+  ['王五', 'wangwu@company.com', '设计部', true, 3, '活跃'],
+  ['赵六', 'zhaoliu@company.com', '运营部', true, 5, '活跃'],
+  ['钱七', 'qianqi@company.com', '市场部', false, 2, '离职'],
+];
+
+const depts = ['技术部', '产品部', '设计部', '运营部', '市场部'];
+const statuses = ['活跃', '休假', '离职'];
+
 const SimpleGridDemo: React.FC = () => {
-  const [data, setData] = useState([
-    ['张三', 'zhangsan@company.com', '技术部', true, 5, '活跃'],
-    ['李四', 'lisi@company.com', '产品部', false, 4, '休假'],
-    ['王五', 'wangwu@company.com', '设计部', true, 3, '活跃'],
-    ['赵六', 'zhaoliu@company.com', '运营部', true, 5, '活跃'],
-    ['钱七', 'qianqi@company.com', '市场部', false, 2, '离职'],
-  ])
+  const [columns, setColumns] = useState<Column[]>(initialColumns);
+  const [data, setData] = useState<Row[]>(initialData);
 
-  const [editable, setEditable] = useState(true)
-
-  const handleCellEdit = (rowIndex: number, colIndex: number, newValue: string | boolean | number) => {
-    if (!editable) return
-    
-    const newData = [...data]
-    newData[rowIndex] = [...newData[rowIndex]]
-    newData[rowIndex][colIndex] = String(newValue)
-    setData(newData)
-  }
-
-  const getComplexityColor = (rating: number) => {
-    if (rating >= 4) return '#10B981' // 绿色
-    if (rating >= 3) return '#F59E0B' // 黄色
-    return '#EF4444' // 红色
-  }
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case '活跃': return '#10B981'
-      case '休假': return '#F59E0B'
-      case '离职': return '#EF4444'
-      default: return '#6B7280'
+  // —— 列宽调整 ——
+  const resizingRef = useRef<{ index: number; startX: number; startWidth: number } | null>(null);
+  useEffect(() => {
+    const onMove = (e: MouseEvent) => {
+      const s = resizingRef.current;
+      if (!s) return;
+      const delta = e.clientX - s.startX;
+      setColumns((prev) => {
+        const next = [...prev];
+        const min = next[s.index].minWidth ?? 60;
+        next[s.index] = { ...next[s.index], width: Math.max(min, s.startWidth + delta) };
+        return next;
+      });
+    };
+    const onUp = () => {
+      resizingRef.current = null;
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+    if (resizingRef.current) {
+      window.addEventListener('mousemove', onMove);
+      window.addEventListener('mouseup', onUp);
     }
-  }
+    return () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+  }, [resizingRef.current]);
+
+  const startResize = (index: number, e: React.MouseEvent) => {
+    const startX = e.clientX;
+    const startWidth = columns[index].width;
+    resizingRef.current = { index, startX, startWidth };
+  };
+
+  // —— 列拖拽排序 ——
+  const dragIndexRef = useRef<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const onDragStart = (index: number, e: React.DragEvent) => {
+    dragIndexRef.current = index;
+    e.dataTransfer.setData('text/plain', String(index));
+    e.dataTransfer.effectAllowed = 'move';
+  };
+  const onDragOver = (index: number, e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOverIndex(index);
+  };
+  const onDrop = (index: number) => {
+    const from = dragIndexRef.current;
+    if (from == null || from === index) return setDragOverIndex(null);
+    setColumns((prev) => {
+      const next = [...prev];
+      const [moved] = next.splice(from, 1);
+      next.splice(index, 0, moved);
+      return next;
+    });
+    setData((prev) =>
+      prev.map((row) => {
+        const r = [...row];
+        const [moved] = r.splice(from!, 1);
+        r.splice(index, 0, moved);
+        return r;
+      })
+    );
+    setDragOverIndex(null);
+  };
+
+  // —— 行/列追加 ——
+  const onRowAppend = () => {
+    setData((prev) => [
+      ...prev,
+      [`用户${prev.length + 1}`, `user${prev.length + 1}@company.com`, '技术部', false, 3, '活跃'],
+    ]);
+  };
+  const onColumnAppend = () => {
+    setColumns((prev) => [
+      ...prev,
+      { key: `col_${prev.length + 1}`, title: `新列${prev.length + 1}`, width: 160 },
+    ]);
+    setData((prev) => prev.map((r) => [...r, '']));
+  };
+
+  // —— 编辑 ——
+  const updateCell = (row: number, col: number, value: string | number | boolean) => {
+    setData((prev) => {
+      const next = [...prev];
+      next[row] = [...next[row]];
+      next[row][col] = value;
+      return next;
+    });
+  };
+
+  // —— 渲染 ——
+  const headerCells = useMemo(() => {
+    return columns.map((col, i) => (
+      <th
+        key={col.key}
+        draggable
+        onDragStart={(e) => onDragStart(i, e)}
+        onDragOver={(e) => onDragOver(i, e)}
+        onDrop={() => onDrop(i)}
+        style={{
+          position: 'relative',
+          width: col.width,
+          minWidth: col.minWidth ?? 60,
+          padding: '12px',
+          borderBottom: '1px solid #e5e7eb',
+          textAlign: 'left',
+          background: '#f9fafb',
+          userSelect: 'none',
+        }}
+        className={dragOverIndex === i ? 'drag-over' : ''}
+        title="拖拽列头可排序"
+      >
+        {col.title}
+        <div
+          onMouseDown={(e) => startResize(i, e)}
+          style={{
+            position: 'absolute',
+            right: 0,
+            top: 0,
+            height: '100%',
+            width: 6,
+            cursor: 'col-resize',
+          }}
+          title="拖拽调整列宽"
+        />
+      </th>
+    ));
+  }, [columns, dragOverIndex]);
+
+  const renderCell = (
+    value: string | number | boolean,
+    colKey: string,
+    rowIndex: number,
+    colIndex: number
+  ) => {
+    if (colKey === 'active') {
+      return (
+        <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+          <input
+            type="checkbox"
+            checked={Boolean(value)}
+            onChange={(e) => updateCell(rowIndex, colIndex, e.target.checked)}
+          />
+          <span style={{ color: Boolean(value) ? '#10B981' : '#EF4444' }}>
+            {Boolean(value) ? '在职' : '离职'}
+          </span>
+        </label>
+      );
+    }
+    if (colKey === 'rating') {
+      const v = Number(value);
+      return (
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          {Array.from({ length: 5 }, (_, i) => (
+            <span
+              key={i}
+              onClick={() => updateCell(rowIndex, colIndex, i + 1)}
+              style={{
+                color: i < v ? '#F59E0B' : '#d1d5db',
+                marginRight: 2,
+                cursor: 'pointer',
+                fontSize: 16,
+              }}
+              title={`评分 ${i + 1}`}
+            >
+              ★
+            </span>
+          ))}
+        </div>
+      );
+    }
+    if (colKey === 'dept') {
+      return (
+        <select
+          value={String(value)}
+          onChange={(e) => updateCell(rowIndex, colIndex, e.target.value)}
+          style={{
+            border: '1px solid #d1d5db',
+            borderRadius: 4,
+            padding: '4px 8px',
+            background: 'white',
+          }}
+        >
+          {depts.map((d) => (
+            <option key={d} value={d}>
+              {d}
+            </option>
+          ))}
+        </select>
+      );
+    }
+    if (colKey === 'status') {
+      return (
+        <select
+          value={String(value)}
+          onChange={(e) => updateCell(rowIndex, colIndex, e.target.value)}
+          style={{
+            border: '1px solid #d1d5db',
+            borderRadius: 4,
+            padding: '4px 8px',
+            background: 'white',
+          }}
+        >
+          {statuses.map((s) => (
+            <option key={s} value={s}>
+              {s}
+            </option>
+          ))}
+        </select>
+      );
+    }
+    if (colKey === 'name' || colKey === 'email') {
+      return (
+        <input
+          type={colKey === 'email' ? 'email' : 'text'}
+          value={String(value)}
+          onChange={(e) => updateCell(rowIndex, colIndex, e.target.value)}
+          style={{
+            border: '1px solid #d1d5db',
+            borderRadius: 4,
+            padding: '4px 8px',
+            width: '100%',
+            background: 'white',
+          }}
+        />
+      );
+    }
+    return String(value ?? '');
+  };
 
   return (
     <div className="demo-section">
       <div className="demo-header">
         <h2>Grid 表格演示</h2>
-        <p>高性能的基于 Canvas 的表格系统演示（简化版本）</p>
+        <p>完整交互：列宽调整、列拖拽排序、编辑、追加行/列（演示版）</p>
       </div>
-      
-      <div className="demo-content">
-        <div className="info-box">
-          <h3>Grid 系统特性</h3>
-          <p>
-            这是一个简化的表格演示，展示了 Grid 系统的核心概念。
-            完整的 Grid 系统支持 Canvas 渲染、虚拟滚动、多种单元格类型等功能。
-          </p>
-        </div>
 
-        <div className="controls">
-          <button
-            className={`control-button ${editable ? 'primary' : ''}`}
-            onClick={() => setEditable(!editable)}
-          >
-            {editable ? '✓ 编辑模式' : '编辑模式'}
-          </button>
-          
-          <button
-            className="control-button"
-            onClick={() => {
-              const newRow = [
-                `用户${data.length + 1}`,
-                `user${data.length + 1}@company.com`,
-                '技术部',
-                Math.random() > 0.5,
-                Math.floor(Math.random() * 5) + 1,
-                ['活跃', '休假', '离职'][Math.floor(Math.random() * 3)]
-              ]
-              setData([...data, newRow])
-            }}
-          >
+      <div className="demo-content">
+        <div className="controls" style={{ marginBottom: 12 }}>
+          <button className="control-button primary" onClick={onRowAppend}>
             + 添加行
           </button>
+          <button className="control-button" onClick={onColumnAppend}>
+            + 添加列
+          </button>
         </div>
 
-        <div style={{ 
-          border: '1px solid #e5e7eb', 
-          borderRadius: '6px', 
-          overflow: 'hidden',
-          background: 'white'
-        }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <div
+          style={{
+            border: '1px solid #e5e7eb',
+            borderRadius: 6,
+            overflow: 'hidden',
+            background: 'white',
+          }}
+        >
+          <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+            <colgroup>
+              {columns.map((c) => (
+                <col key={c.key} style={{ width: c.width }} />
+              ))}
+            </colgroup>
             <thead>
-              <tr style={{ background: '#f9fafb' }}>
-                <th style={{ padding: '12px', borderBottom: '1px solid #e5e7eb', textAlign: 'left' }}>姓名</th>
-                <th style={{ padding: '12px', borderBottom: '1px solid #e5e7eb', textAlign: 'left' }}>邮箱</th>
-                <th style={{ padding: '12px', borderBottom: '1px solid #e5e7eb', textAlign: 'left' }}>部门</th>
-                <th style={{ padding: '12px', borderBottom: '1px solid #e5e7eb', textAlign: 'left' }}>在职</th>
-                <th style={{ padding: '12px', borderBottom: '1px solid #e5e7eb', textAlign: 'left' }}>评分</th>
-                <th style={{ padding: '12px', borderBottom: '1px solid #e5e7eb', textAlign: 'left' }}>状态</th>
-              </tr>
+              <tr>{headerCells}</tr>
             </thead>
             <tbody>
               {data.map((row, rowIndex) => (
                 <tr key={rowIndex} style={{ borderBottom: '1px solid #f3f4f6' }}>
-                  <td style={{ padding: '12px' }}>
-                    {editable ? (
-                      <input
-                        type="text"
-                        value={String(row[0])}
-                        onChange={(e) => handleCellEdit(rowIndex, 0, e.target.value)}
-                        style={{
-                          border: '1px solid #d1d5db',
-                          borderRadius: '4px',
-                          padding: '4px 8px',
-                          width: '100%',
-                          background: 'white'
-                        }}
-                      />
-                    ) : (
-                      row[0]
-                    )}
-                  </td>
-                  <td style={{ padding: '12px' }}>
-                    {editable ? (
-                      <input
-                        type="email"
-                        value={String(row[1])}
-                        onChange={(e) => handleCellEdit(rowIndex, 1, e.target.value)}
-                        style={{
-                          border: '1px solid #d1d5db',
-                          borderRadius: '4px',
-                          padding: '4px 8px',
-                          width: '100%',
-                          background: 'white'
-                        }}
-                      />
-                    ) : (
-                      row[1]
-                    )}
-                  </td>
-                  <td style={{ padding: '12px' }}>
-                    {editable ? (
-                      <select
-                        value={String(row[2])}
-                        onChange={(e) => handleCellEdit(rowIndex, 2, e.target.value)}
-                        style={{
-                          border: '1px solid #d1d5db',
-                          borderRadius: '4px',
-                          padding: '4px 8px',
-                          width: '100%',
-                          background: 'white'
-                        }}
-                      >
-                        <option value="技术部">技术部</option>
-                        <option value="产品部">产品部</option>
-                        <option value="设计部">设计部</option>
-                        <option value="运营部">运营部</option>
-                        <option value="市场部">市场部</option>
-                      </select>
-                    ) : (
-                      row[2]
-                    )}
-                  </td>
-                  <td style={{ padding: '12px', textAlign: 'center' }}>
-                    {editable ? (
-                      <input
-                        type="checkbox"
-                        checked={Boolean(row[3])}
-                        onChange={(e) => handleCellEdit(rowIndex, 3, e.target.checked)}
-                      />
-                    ) : (
-                      <span style={{ color: Boolean(row[3]) ? '#10B981' : '#EF4444' }}>
-                        {Boolean(row[3]) ? '✓' : '✗'}
-                      </span>
-                    )}
-                  </td>
-                  <td style={{ padding: '12px', textAlign: 'center' }}>
-                    {editable ? (
-                      <select
-                        value={String(row[4])}
-                        onChange={(e) => handleCellEdit(rowIndex, 4, Number(e.target.value))}
-                        style={{
-                          border: '1px solid #d1d5db',
-                          borderRadius: '4px',
-                          padding: '4px 8px',
-                          background: 'white'
-                        }}
-                      >
-                        <option value={1}>1</option>
-                        <option value={2}>2</option>
-                        <option value={3}>3</option>
-                        <option value={4}>4</option>
-                        <option value={5}>5</option>
-                      </select>
-                    ) : (
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        {Array.from({ length: 5 }, (_, i) => (
-                          <span
-                            key={i}
-                            style={{
-                              color: i < Number(row[4]) ? getComplexityColor(Number(row[4])) : '#d1d5db',
-                              marginRight: '2px'
-                            }}
-                          >
-                            ★
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </td>
-                  <td style={{ padding: '12px' }}>
-                    {editable ? (
-                      <select
-                        value={String(row[5])}
-                        onChange={(e) => handleCellEdit(rowIndex, 5, e.target.value)}
-                        style={{
-                          border: '1px solid #d1d5db',
-                          borderRadius: '4px',
-                          padding: '4px 8px',
-                          width: '100%',
-                          background: 'white'
-                        }}
-                      >
-                        <option value="活跃">活跃</option>
-                        <option value="休假">休假</option>
-                        <option value="离职">离职</option>
-                      </select>
-                    ) : (
-                      <span style={{ 
-                        color: getStatusColor(String(row[5])),
-                        fontWeight: '500'
-                      }}>
-                        {row[5]}
-                      </span>
-                    )}
-                  </td>
+                  {columns.map((c, colIndex) => (
+                    <td
+                      key={c.key}
+                      style={{
+                        padding: '12px',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {renderCell(row[colIndex], c.key, rowIndex, colIndex)}
+                    </td>
+                  ))}
                 </tr>
               ))}
             </tbody>
@@ -238,44 +321,18 @@ const SimpleGridDemo: React.FC = () => {
 
         <div className="feature-list">
           <div className="feature-card">
-            <h3>完整 Grid 系统特性</h3>
+            <h3>已实现能力（演示版）</h3>
             <ul>
-              <li>Canvas 渲染，支持百万行数据</li>
-              <li>虚拟滚动，流畅的用户体验</li>
-              <li>多种单元格类型（文本、布尔、评分、选择器）</li>
-              <li>实时编辑和验证</li>
-              <li>拖拽排序和列调整</li>
-              <li>键盘导航支持</li>
-            </ul>
-          </div>
-          
-          <div className="feature-card">
-            <h3>性能优化</h3>
-            <ul>
-              <li>智能缓存策略</li>
-              <li>内存优化算法</li>
-              <li>响应式设计</li>
-              <li>TypeScript 完整支持</li>
-              <li>模块化架构</li>
-              <li>可扩展组件系统</li>
-            </ul>
-          </div>
-          
-          <div className="feature-card">
-            <h3>使用场景</h3>
-            <ul>
-              <li>数据表格和报表</li>
-              <li>数据分析和可视化</li>
-              <li>内容管理系统</li>
-              <li>财务和会计系统</li>
-              <li>项目管理系统</li>
-              <li>CRM 和 ERP 系统</li>
+              <li>列宽拖拽调整</li>
+              <li>列头拖拽排序</li>
+              <li>文本/邮箱/选择/布尔/评分基础编辑</li>
+              <li>追加行/列</li>
             </ul>
           </div>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default SimpleGridDemo
+export default SimpleGridDemo;
