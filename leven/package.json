@@ -1,0 +1,11 @@
+{
+  "name": "leven-workspace",
+  "private": true,
+  "pnpm": {
+    "overrides": {
+      "ts-keycode-enum": "^1.0.6"
+    }
+  }
+}
+
+

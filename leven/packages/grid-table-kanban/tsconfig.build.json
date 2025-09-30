@@ -10,7 +10,6 @@
   "exclude": [
     "node_modules",
     "**/*.spec.ts",
-    "**/*.test.ts",
-    "src/kanban/**"
+    "**/*.test.ts"
   ]
 }
