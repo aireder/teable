@@ -1,0 +1,100 @@
+server:
+  port: 8080
+  mode: debug # debug, release, test
+  read_timeout: 60s
+  write_timeout: 60s
+  max_multipart_memory: 32 # MB
+
+database:
+  host: localhost
+  port: 5432
+  user: postgres
+  password: postgres
+  database: teable
+  ssl_mode: disable
+  max_idle_conns: 10
+  max_open_conns: 100
+  conn_max_lifetime: 1h
+  log_level: info # silent, error, warn, info
+
+redis:
+  addr: localhost:6379
+  password: ""
+  db: 0
+  pool_size: 10
+  min_idle_conns: 5
+  max_retries: 3
+
+storage:
+  provider: minio # minio, s3, local
+  endpoint: localhost:9000
+  access_key: minioadmin
+  secret_key: minioadmin
+  bucket_name: teable
+  use_ssl: false
+  region: us-east-1
+  presigned_url_expiry: 3600 # seconds
+
+jwt:
+  secret: your-secret-key-change-this-in-production
+  expiry: 24h
+  refresh_expiry: 168h # 7 days
+  issuer: teable
+
+oauth:
+  google:
+    client_id: ""
+    client_secret: ""
+    redirect_url: http://localhost:8080/api/auth/google/callback
+  github:
+    client_id: ""
+    client_secret: ""
+    redirect_url: http://localhost:8080/api/auth/github/callback
+
+websocket:
+  read_buffer_size: 1024
+  write_buffer_size: 1024
+  max_message_size: 512 # KB
+  ping_period: 54s
+  pong_wait: 60s
+  write_wait: 10s
+
+logger:
+  level: info # debug, info, warn, error
+  format: json # json, text
+  output: stdout # stdout, stderr, file
+  file_path: logs/app.log
+  max_size: 100 # MB
+  max_backups: 3
+  max_age: 28 # days
+  compress: true
+
+cache:
+  default_expiration: 5m
+  cleanup_interval: 10m
+  
+threshold:
+  max_free_row_limit: 50000
+  max_group_points: 5000
+  max_records_per_request: 1000
+
+cors:
+  allow_origins:
+    - http://localhost:3000
+    - http://localhost:8080
+  allow_methods:
+    - GET
+    - POST
+    - PUT
+    - DELETE
+    - PATCH
+    - OPTIONS
+  allow_headers:
+    - Origin
+    - Content-Type
+    - Authorization
+    - X-Requested-With
+  expose_headers:
+    - Content-Length
+  allow_credentials: true
+  max_age: 12h
