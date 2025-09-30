@@ -1,0 +1,31 @@
+{
+  "name": "sdk-table-demo",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port 3002",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@teable/sdk": "workspace:^",
+    "@teable/ui-lib": "workspace:^",
+    "@teable/core": "workspace:^",
+    "@teable/icons": "workspace:^",
+    "@tanstack/react-query": "4.36.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "zustand": "4.5.2"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.69",
+    "@types/react-dom": "^18.2.22",
+    "@vitejs/plugin-react-swc": "3.6.0",
+    "autoprefixer": "^10.4.16",
+    "postcss": "^8.4.31",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5.4.3",
+    "vite": "^4.5.0"
+  }
+}
